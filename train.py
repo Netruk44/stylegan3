@@ -137,6 +137,9 @@ def parse_comma_separated_list(s):
 @click.option('--aug',          help='Augmentation mode',                                       type=click.Choice(['noaug', 'ada', 'fixed']), default='ada', show_default=True)
 @click.option('--resume',       help='Resume from given network pickle', metavar='[PATH|URL]',  type=str)
 @click.option('--freezed',      help='Freeze first layers of D', metavar='INT',                 type=click.IntRange(min=0), default=0, show_default=True)
+@click.option('--lookahead',    help='Enable lookahead', metavar='BOOL',                        type=bool, default=True, show_default=True)
+@click.option('--lookahead-alpha',help='alpha value for lookahead', metavar='FLOAT',            type=click.FloatRange(min=0., max=1.), default=0.5, show_default=True)
+@click.option('--lookahead-k',  help='k value for lookahead', metavar='INT',                    type=click.IntRange(min=1), default=5, show_default=True)
 
 # Misc hyperparameters.
 @click.option('--p',            help='Probability for --aug=fixed', metavar='FLOAT',            type=click.FloatRange(min=0, max=1), default=0.2, show_default=True)
@@ -219,6 +222,9 @@ def main(**kwargs):
     c.image_snapshot_ticks = c.network_snapshot_ticks = opts.snap
     c.random_seed = c.training_set_kwargs.random_seed = opts.seed
     c.data_loader_kwargs.num_workers = opts.workers
+    c.lookahead = opts.lookahead
+    c.lookahead_alpha = opts.lookahead_alpha
+    c.lookahead_k = opts.lookahead_k
 
     # Sanity checks.
     if c.batch_size % c.num_gpus != 0:

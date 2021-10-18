@@ -22,6 +22,7 @@ from torch_utils import misc
 from torch_utils import training_stats
 from torch_utils.ops import conv2d_gradfix
 from torch_utils.ops import grid_sample_gradfix
+from training.lookahead import Lookahead
 
 import legacy
 from metrics import metric_main
@@ -120,6 +121,9 @@ def training_loop(
     cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
     abort_fn                = None,     # Callback function for determining whether to abort training. Must return consistent results across ranks.
     progress_fn             = None,     # Callback function for updating training progress. Called for all ranks.
+    lookahead               = True,     # Lookahead enabled
+    lookahead_alpha         = 0.5,      # Alpha value for lookahead
+    lookahead_k             = 5,        # K value for lookahead
 ):
     # Initialize.
     start_time = time.time()
@@ -195,6 +199,8 @@ def training_loop(
     for name, module, opt_kwargs, reg_interval in [('G', G, G_opt_kwargs, G_reg_interval), ('D', D, D_opt_kwargs, D_reg_interval)]:
         if reg_interval is None:
             opt = dnnlib.util.construct_class_by_name(params=module.parameters(), **opt_kwargs) # subclass of torch.optim.Optimizer
+            if lookahead:
+                opt = Lookahead(opt, alpha=lookahead_alpha)
             phases += [dnnlib.EasyDict(name=name+'both', module=module, opt=opt, interval=1)]
         else: # Lazy regularization.
             mb_ratio = reg_interval / (reg_interval + 1)
@@ -202,6 +208,8 @@ def training_loop(
             opt_kwargs.lr = opt_kwargs.lr * mb_ratio
             opt_kwargs.betas = [beta ** mb_ratio for beta in opt_kwargs.betas]
             opt = dnnlib.util.construct_class_by_name(module.parameters(), **opt_kwargs) # subclass of torch.optim.Optimizer
+            if lookahead:
+                opt = Lookahead(opt, alpha=lookahead_alpha)
             phases += [dnnlib.EasyDict(name=name+'main', module=module, opt=opt, interval=1)]
             phases += [dnnlib.EasyDict(name=name+'reg', module=module, opt=opt, interval=reg_interval)]
     for phase in phases:
@@ -291,6 +299,10 @@ def training_loop(
                     for param, grad in zip(params, grads):
                         param.grad = grad.reshape(param.shape)
                 phase.opt.step()
+            
+            # Lookahead update.
+            if lookahead and (batch_idx + 1) % lookahead_k == 0:
+                phase.opt.lookahead_step()
 
             # Phase done.
             if phase.end_event is not None:
