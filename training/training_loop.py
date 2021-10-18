@@ -301,7 +301,7 @@ def training_loop(
                 phase.opt.step()
             
             # Lookahead update.
-            if lookahead and (batch_idx + 1) % lookahead_k == 0:
+            if lookahead and phase.interval == 1 and (batch_idx + 1) % lookahead_k == 0:
                 phase.opt.lookahead_step()
 
             # Phase done.
