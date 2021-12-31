@@ -6,8 +6,10 @@
   * Increase k to speed up training progress with increased risk of 'entanglement', which can take a long time to train back out of the generator.
   * There's no upper limit to the k value, k=infinity is the same as training without lookahead.
 * **Load separate discriminator**: Use `--disc-override` to specify a different snapshot to load the discriminator from.
+  * It's kind of like a discriminator-specific lookahead step.
   * Once the FID progress starts plateauing, I find it useful to load an old discriminator to continue training.
   * The old discriminator isn't as 'tuned' to the current state of the generator, allowing the generator to more freely explore solutions to disentanglement.
+  * I've found that rolling the discriminator back 10,000 kimg (after training for 20,000 kimg total) has little to no negative effect on the overall FID going forward.
 
 ## Alias-Free Generative Adversarial Networks (StyleGAN3)<br><sub>Official PyTorch implementation of the NeurIPS 2021 paper</sub>
 
