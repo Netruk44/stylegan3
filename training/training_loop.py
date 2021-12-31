@@ -118,6 +118,7 @@ def training_loop(
     network_snapshot_ticks  = 50,       # How often to save network snapshots? None = disable.
     resume_pkl              = None,     # Network pickle to resume training from.
     resume_kimg             = 0,        # First kimg to report when resuming training.
+    disc_override           = None,     # Discriminator override network pickle.
     cudnn_benchmark         = True,     # Enable torch.backends.cudnn.benchmark?
     abort_fn                = None,     # Callback function for determining whether to abort training. Must return consistent results across ranks.
     progress_fn             = None,     # Callback function for updating training progress. Called for all ranks.
@@ -164,6 +165,12 @@ def training_loop(
             resume_data = legacy.load_network_pkl(f)
         for name, module in [('G', G), ('D', D), ('G_ema', G_ema)]:
             misc.copy_params_and_buffers(resume_data[name], module, require_all=False)
+        
+        if disc_override is not None:
+            print(f'Loading discriminator override from "{disc_override}"')
+            with dnnlib.util.open_url(disc_override) as f:
+                override_data = legacy.load_network_pkl(f)
+            misc.copy_params_and_buffers(override_data['D'], D, require_all=False)
 
     # Print network summary tables.
     if rank == 0:
