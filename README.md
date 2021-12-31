@@ -1,3 +1,14 @@
+# Changes in this fork
+* **dataset_tool**: Error log improvement: If image attributes aren't all the same, the error output inclues which image isn't correct.
+* **Lookahead**: Implements lookahead as defined in: https://arxiv.org/abs/2006.14567
+  * `--lookahead-alpha` to change the alpha value (Default: 0.5, not recommended to change).
+  * `--lookahead-k` to change the k value (Default: 5).
+  * Increase k to speed up training progress with increased risk of 'entanglement', which can take a long time to train back out of the generator.
+  * There's no upper limit to the k value, k=infinity is the same as training without lookahead.
+* **Load separate discriminator**: Use `--disc-override` to specify a different snapshot to load the discriminator from.
+  * Once the FID progress starts plateauing, I find it useful to load an old discriminator to continue training.
+  * The old discriminator isn't as 'tuned' to the current state of the generator, allowing the generator to more freely explore solutions to disentanglement.
+
 ## Alias-Free Generative Adversarial Networks (StyleGAN3)<br><sub>Official PyTorch implementation of the NeurIPS 2021 paper</sub>
 
 ![Teaser image](./docs/stylegan3-teaser-1920x1006.png)
