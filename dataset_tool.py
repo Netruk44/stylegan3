@@ -227,6 +227,7 @@ def make_transform(
         ww = width if width is not None else w
         hh = height if height is not None else h
         img = img.resize((ww, hh), PIL.Image.LANCZOS)
+        img = img.convert('RGB')
         return np.array(img)
 
     def center_crop(width, height, img):
@@ -234,6 +235,7 @@ def make_transform(
         img = img[(img.shape[0] - crop) // 2 : (img.shape[0] + crop) // 2, (img.shape[1] - crop) // 2 : (img.shape[1] + crop) // 2]
         img = PIL.Image.fromarray(img, 'RGB')
         img = img.resize((width, height), PIL.Image.LANCZOS)
+        img = img.convert('RGB')
         return np.array(img)
 
     def center_crop_wide(width, height, img):
@@ -244,6 +246,7 @@ def make_transform(
         img = img[(img.shape[0] - ch) // 2 : (img.shape[0] + ch) // 2]
         img = PIL.Image.fromarray(img, 'RGB')
         img = img.resize((width, height), PIL.Image.LANCZOS)
+        img = img.convert('RGB')
         img = np.array(img)
 
         canvas = np.zeros([width, width, 3], dtype=np.uint8)
