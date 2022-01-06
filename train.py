@@ -152,6 +152,8 @@ def parse_comma_separated_list(s):
 @click.option('--dlr',          help='D learning rate', metavar='FLOAT',                        type=click.FloatRange(min=0), default=0.002, show_default=True)
 @click.option('--map-depth',    help='Mapping network depth  [default: varies]', metavar='INT', type=click.IntRange(min=1))
 @click.option('--mbstd-group',  help='Minibatch std group size', metavar='INT',                 type=click.IntRange(min=1), default=4, show_default=True)
+@click.option('--force-blur',   help='Force blur for first few kimgs', metavar='BOOL',          type=bool, default=False, show_default=True)
+@click.option('--blur-kimg',    help='Fade out the blur over the first N kimgs', metavar='INT', type=click.IntRange(min=0), default=200, show_default=True)
 
 # Misc settings.
 @click.option('--desc',         help='String to include in result dir name', metavar='STR',     type=str)
@@ -255,7 +257,7 @@ def main(**kwargs):
             c.G_kwargs.channel_max *= 2
             c.G_kwargs.use_radial_filters = True # Use radially symmetric downsampling filters.
             c.loss_kwargs.blur_init_sigma = 10 # Blur the images seen by the discriminator.
-            c.loss_kwargs.blur_fade_kimg = c.batch_size * 200 / 32 # Fade out the blur during the first N kimg.
+            c.loss_kwargs.blur_fade_kimg = c.batch_size * opts.blur_kimg / 32 # Fade out the blur during the first N kimg.
 
     # Augmentation.
     if opts.aug != 'noaug':
@@ -270,7 +272,9 @@ def main(**kwargs):
         c.resume_pkl = opts.resume
         c.ada_kimg = 100 # Make ADA react faster at the beginning.
         c.ema_rampup = None # Disable EMA rampup.
-        c.loss_kwargs.blur_init_sigma = 0 # Disable blur rampup.
+
+        if not opts.force_blur:
+            c.loss_kwargs.blur_init_sigma = 0 # Disable blur rampup.
 
         if opts.disc_override is not None:
             c.disc_override = opts.disc_override
