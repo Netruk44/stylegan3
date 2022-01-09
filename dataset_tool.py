@@ -77,7 +77,9 @@ def open_image_folder(source_dir, *, max_images: Optional[int]):
             labels = json.load(file)['labels']
             if labels is not None:
                 labels = { x[0]: x[1] for x in labels }
+                print(f"Loaded {len(labels)} labels.")
             else:
+                print(f"Could not load '{meta_fname}'['labels'], not using labels.")
                 labels = {}
 
     max_idx = maybe_min(len(input_images), max_images)
@@ -445,7 +447,10 @@ def convert_dataset(
         image_bits = io.BytesIO()
         img.save(image_bits, format='png', compress_level=0, optimize=False)
         save_bytes(os.path.join(archive_root_dir, archive_fname), image_bits.getbuffer())
-        labels.append([archive_fname, image['label']] if image['label'] is not None else None)
+        cur_label = [archive_fname, image['label']] if image['label'] is not None else None
+        if cur_label is None:
+            print(f"WARNING: No label for image {image['fname']} | {archive_fname}")
+        labels.append(cur_label)
 
     metadata = {
         'labels': labels if all(x is not None for x in labels) else None
