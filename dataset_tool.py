@@ -223,13 +223,14 @@ def make_transform(
     def scale(width, height, img):
         w = img.shape[1]
         h = img.shape[0]
-        if width == w and height == h:
-            return img
         img = PIL.Image.fromarray(img)
+        img = img.convert('RGB')
+        if width == w and height == h:
+            return np.array(img)
+        
         ww = width if width is not None else w
         hh = height if height is not None else h
         img = img.resize((ww, hh), PIL.Image.LANCZOS)
-        img = img.convert('RGB')
         return np.array(img)
 
     def center_crop(width, height, img):
