@@ -363,10 +363,6 @@ def preprocess_image(image: Dict[str, any]) -> Tuple[str, int]:
 
 #----------------------------------------------------------------------------
 
-
-def f(x):
-    return x*x
-
 @click.command()
 @click.pass_context
 @click.option('--source', help='Directory or archive name for input dataset', required=True, metavar='PATH')
