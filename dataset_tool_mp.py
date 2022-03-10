@@ -477,7 +477,8 @@ def convert_dataset(
             label_mapping = list(tqdm(pool.imap_unordered(preprocess_image, input_iter), total=num_files))
     
     # Phase 2, write out the dataset.json file.
-    if all(x[1] is not None for x in label_mapping if x[0] is not None):
+    label_mapping = [x for x in label_mapping if x[0] is not None]
+    if all(x[1] is not None for x in label_mapping):
         print("Writing dataset.json...")
         with open(os.path.join(dest, 'dataset.json'), 'w') as f:
             json.dump(dict(labels=label_mapping), f)
