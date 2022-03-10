@@ -359,7 +359,7 @@ def preprocess_image(image: Dict[str, any]) -> Tuple[str, int]:
     img.save(image_bits, format='png', compress_level=0, optimize=False)
     save_bytes(os.path.join(archive_root_dir, archive_fname), image_bits.getbuffer())
 
-    return (os.path.join(archive_root_dir, archive_fname), label)
+    return (archive_fname, label)
 
 #----------------------------------------------------------------------------
 
