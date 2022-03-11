@@ -1,15 +1,18 @@
 # Changes in this fork
 * **dataset_tool**: Error log improvement: If image attributes aren't all the same, the error output inclues which image isn't correct.
+* * **dataset_tool_mp**: A multiprocess dataset tool for greatly speeding up large dataset creation (which is single-threaded by default). Only compatible with image folder destinations, can't create zip files.
 * **Lookahead**: Implements lookahead as defined in: https://arxiv.org/abs/2006.14567
   * `--lookahead-alpha` to change the alpha value (Default: 0.5, not recommended to change).
   * `--lookahead-k` to change the k value (Default: 5).
   * Increase k to speed up training progress with increased risk of 'entanglement', which can take a long time to train back out of the generator.
   * There's no upper limit to the k value, k=infinity is the same as training without lookahead.
+  * Preliminary results are that lookahead doesn't increase training speed like it does with StyleGAN2. Lookahead seems to slow the FID progress without improving the overall FID in the long run. It's possible that given more resources than I have available (1x3090), lookahead would be able to improve the FID further than what I was able to achieve, but I had to give up after 2 months of training.
 * **Load separate discriminator**: Use `--disc-override` to specify a different snapshot to load the discriminator from.
   * It's kind of like a discriminator-specific lookahead step.
   * Once the FID progress starts plateauing, I find it useful to load an old discriminator to continue training.
   * The old discriminator isn't as 'tuned' to the current state of the generator, allowing the generator to more freely explore solutions to disentanglement.
   * I've found that rolling the discriminator back 10,000 kimg (after training for 20,000 kimg total) has little to no negative effect on the overall FID going forward.
+  * Rolling the discriminator back to near the start (2,000 kimg) has a noticeable negative impact to the FID. FID increased from 10.0 to 15.0 over the following 2,000 kimg.
 
 ## Alias-Free Generative Adversarial Networks (StyleGAN3)<br><sub>Official PyTorch implementation of the NeurIPS 2021 paper</sub>
 
