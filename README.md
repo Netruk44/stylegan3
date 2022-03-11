@@ -1,6 +1,6 @@
 # Changes in this fork
 * **dataset_tool**: Error log improvement: If image attributes aren't all the same, the error output inclues which image isn't correct.
-* * **dataset_tool_mp**: A multiprocess dataset tool for greatly speeding up large dataset creation (which is single-threaded by default). Only compatible with image folder destinations, can't create zip files.
+* **dataset_tool_mp**: A multiprocess dataset tool for greatly speeding up large dataset creation (which is single-threaded by default). Only compatible with image folder destinations, can't create zip files.
 * **Lookahead**: Implements lookahead as defined in: https://arxiv.org/abs/2006.14567
   * `--lookahead-alpha` to change the alpha value (Default: 0.5, not recommended to change).
   * `--lookahead-k` to change the k value (Default: 5).
