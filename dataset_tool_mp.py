@@ -90,8 +90,7 @@ def open_image_folder(source_dir, *, max_images: Optional[int]):
         for idx, fname in enumerate(input_images):
             arch_fname = os.path.relpath(fname, source_dir)
             arch_fname = arch_fname.replace('\\', '/')
-            img = np.array(PIL.Image.open(fname))
-            yield dict(img=img, label=labels.get(arch_fname), fname=fname)
+            yield dict(label=labels.get(arch_fname), fname=fname)
             if idx >= max_idx-1:
                 break
     return max_idx, iterate_images()
@@ -326,7 +325,6 @@ def open_dest(dest: str) -> Tuple[str, Callable[[str, Union[bytes, str]], None],
 
 def preprocess_image(image: Dict[str, any]) -> Tuple[str, int]:
     # return: mapping from output filename to label
-    img = image['img']
     label = image['label']
     fname = image['fname']
     transform = image['transform']
@@ -335,9 +333,11 @@ def preprocess_image(image: Dict[str, any]) -> Tuple[str, int]:
     shared_state = image['shared_state']
     shared_state_lock = image['shared_state_lock']
 
+    img = np.array(PIL.Image.open(fname))
     transform_image = make_transform(transform, *resolution)
     archive_root_dir, save_bytes, close_dest = open_dest(dest)
 
+    # Acquire lock and get current image index.
     shared_state_lock.acquire()
     idx = shared_state['cur_idx']
     shared_state['cur_idx'] += 1
